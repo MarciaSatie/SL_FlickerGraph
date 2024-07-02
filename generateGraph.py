@@ -34,6 +34,16 @@ scatter_y = plt.scatter(
 plt.plot(timeline, x, label='Value in X',marker='o')
 plt.plot(timeline, y, label='Value in Y', marker='.', linestyle='--')
 
+legend= plt.legend(loc='upper left')
+# Naming the x axis
+plt.xlabel('Frames range')
+# Naming the y axis
+plt.ylabel('Flicker value range')
+
+# Adding grid
+plt.grid(True)
+# Giving a title to my graph
+plt.title('Flicker graph!')
 
 annotations = []
 for i in range(len(timeline)):
@@ -54,6 +64,7 @@ def hover(event):
     annotation_visibility = annotation.get_visible()
     if event.inaxes ==ax:
         is_contained, annotation_index = scatter_x.contains(event)
+        
         print(is_contained,annotation_index)
         if is_contained:
             data_point_location = scatter_x.get_offsets()[annotation_index['ind'][0]]
@@ -63,23 +74,14 @@ def hover(event):
             annotation.set_text(text_label)
             annotation.set_visible(True)
             fig.canvas.draw_idle()
+            legend.set_visible(False)
         else:
             if annotation_visibility:
                 annotation.set_visible(False)
                 fig.canvas.draw_idle()
+                legend.set_visible(True)
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
-
-plt.legend()
-# Naming the x axis
-plt.xlabel('Frames range')
-# Naming the y axis
-plt.ylabel('Flicker value range')
-
-# Adding grid
-plt.grid(True)
-# Giving a title to my graph
-plt.title('Flicker graph!')
 
 # Zoom In and Out buttons
 ax_zoom_in = plt.axes([0.8, 0.01, 0.15, 0.05])
