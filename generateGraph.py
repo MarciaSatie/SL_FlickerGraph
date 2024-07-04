@@ -45,6 +45,11 @@ plt.grid(True)
 # Giving a title to my graph
 plt.title('Flicker graph!')
 
+# Set more ticks on x and y axes
+plt.xticks(range(timeline[-1]))
+
+
+
 annotations = []
 for i in range(len(timeline)):
     annotation = ax.annotate(
@@ -61,25 +66,28 @@ for i in range(len(timeline)):
     annotation.set_visible(False)
 
 def hover(event): 
-    annotation_visibility = annotation.get_visible()
-    if event.inaxes ==ax:
-        is_contained, annotation_index = scatter_x.contains(event)
+    visible_any_annotation = False
+    if event.inaxes == ax:
+        is_contained_x, annotation_index_x = scatter_x.contains(event)
+        is_contained_y, annotation_index_y = scatter_y.contains(event)
         
-        print(is_contained,annotation_index)
-        if is_contained:
-            data_point_location = scatter_x.get_offsets()[annotation_index['ind'][0]]
-            annotation.xy = data_point_location
-            
-            text_label = 'x: {:.3f} | y: {:.3f}'.format(x[i], y[i]) 
-            annotation.set_text(text_label)
-            annotation.set_visible(True)
-            fig.canvas.draw_idle()
+        if is_contained_x or is_contained_y:
+            # Extract index of the point under cursor
+            indexValue = annotation_index_x['ind'][0] if is_contained_x else annotation_index_y['ind'][0]
+            # Get the location of the point
+            data_point_location = scatter_x.get_offsets()[indexValue] if is_contained_x else scatter_y.get_offsets()[indexValue]
+            # Update annotation with new position and text
+            annotations[indexValue].xy = data_point_location
+            text_label = 'x: {:.3f} | y: {:.3f}'.format(x[indexValue], y[indexValue]) 
+            annotations[indexValue].set_text(text_label)
+            annotations[indexValue].set_visible(True)
+            visible_any_annotation = True
             legend.set_visible(False)
-        else:
-            if annotation_visibility:
+        if not visible_any_annotation:
+            for annotation in annotations:
                 annotation.set_visible(False)
-                fig.canvas.draw_idle()
-                legend.set_visible(True)
+            legend.set_visible(True)
+        fig.canvas.draw_idle()
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
 
