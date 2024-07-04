@@ -18,7 +18,7 @@ y = [float(item['posY']) for item in data]
 timeline = [int(item['id']) for item in data]
 
 # Plotting the points
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(16, 7))
 scatter_x = plt.scatter(
     x=timeline,
     y=x,
@@ -45,11 +45,32 @@ plt.grid(True)
 # Giving a title to my graph
 plt.title('Flicker graph!')
 
+# Resize the current figure window
+fig.set_size_inches(16, 7)
+
 # Set more ticks on x and y axes
 plt.xticks(range(timeline[-1]))
 
-
-
+# Function to print current figure size and check if width is less than 7 inches
+def on_resize(event):
+    current_size = fig.get_size_inches()
+    print("Current figure size: {} x {}".format(current_size[0], current_size[1]))
+      
+    if current_size[0]>15:
+        ax.set_xticks(np.arange(0, len(timeline), step=2))
+        plt.draw()
+    elif current_size[0] <= 15 and current_size[0] > 8:
+        print("Warning: Window width is smaller than 15 inches.")
+        ax.set_xticks(np.arange(0, len(timeline), step=2))
+        plt.draw()
+    elif current_size[0] <= 8:
+        print("Warning: Window width is smaller than 8 inches.")
+        ax.set_xticks(np.arange(0, len(timeline), step=10))
+        plt.draw()
+        
+# Connect the resize event
+fig.canvas.mpl_connect('resize_event', on_resize)
+        
 annotations = []
 for i in range(len(timeline)):
     annotation = ax.annotate(
