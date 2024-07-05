@@ -41,8 +41,8 @@ scatter_y = plt.scatter(
     c="blue",
     s=40,
 )
-plt.plot(timeline, x, label='Value in X', marker='o')
-plt.plot(timeline, y, label='Value in Y', marker='.', linestyle='--')
+line_x, = plt.plot(timeline, x, label='Value in X', marker='o')
+line_y, = plt.plot(timeline, y, label='Value in Y', marker='.', linestyle='--')
 
 legend = plt.legend(loc='upper left')
 # Naming the x axis
@@ -108,15 +108,15 @@ def hover(event):
             data_point_location = scatter_x.get_offsets()[index_value] if is_contained_x else scatter_y.get_offsets()[index_value]
             # Update annotation with new position and text
             annotations[index_value].xy = data_point_location
-            text_label = 'x: {:.3f} | y: {:.3f}'.format(x[index_value], y[index_value]) 
+            text_label = 'x: {:.3f} | y: {:.3f}'.format(new_x[index_value], new_y[index_value]) 
             annotations[index_value].set_text(text_label)
             annotations[index_value].set_visible(True)
             visible_any_annotation = True
-            legend.set_visible(False)
+            #legend.set_visible(False)
         if not visible_any_annotation:
             for annotation in annotations:
                 annotation.set_visible(False)
-            legend.set_visible(True)
+            #legend.set_visible(True)
         fig.canvas.draw_idle()
 
 fig.canvas.mpl_connect('motion_notify_event', hover)
@@ -141,9 +141,54 @@ textBox.on_submit(updateYLimit)
 
 # Text Box - Set Amplitude 
 ax_box2 = plt.axes([0.2, 0.025, 0.02, 0.04])
-textBox2 = TextBox(ax_box2, "Set values Aplitude %: ")
+textBox2 = TextBox(ax_box2, "Set values Amplitude %: ")
 
-#textBox2.on_submit()
+new_x = list(x)  # Initialize new_x
+new_y = list(y)  # Initialize new_y
+
+def updateAmplitude(text):
+    global new_x, new_y  # Make new_x and new_y accessible in the function
+    try:
+        percentage = float(text)
+        # Update x and y values based on the percentage from the current values
+        new_x = [val * (1 + percentage / 100.0) for val in new_x]
+        new_y = [val * (1 + percentage / 100.0) for val in new_y]
+        
+        # Update the scatter plots
+        scatter_x.set_offsets(np.c_[timeline, new_x])
+        scatter_y.set_offsets(np.c_[timeline, new_y])
+        
+        # Update the lines
+        line_x.set_ydata(new_x)
+        line_y.set_ydata(new_y)
+        
+        plt.draw()
+    except ValueError:
+        print("Invalid input for amplitude percentage. Please enter a valid number.")
+
+textBox2.on_submit(updateAmplitude)
+
+# Reset Button
+ax_reset = plt.axes([0.5, 0.01, 0.15, 0.05])
+button_reset = Button(ax_reset, 'Reset Amplitude')
+
+def resetAmplitude(event):
+    global new_x, new_y  # Make new_x and new_y accessible in the function
+    # Reset x and y values to their original state
+    new_x = list(x)
+    new_y = list(y)
+    
+    # Update the scatter plots
+    scatter_x.set_offsets(np.c_[timeline, new_x])
+    scatter_y.set_offsets(np.c_[timeline, new_y])
+    
+    # Update the lines
+    line_x.set_ydata(new_x)
+    line_y.set_ydata(new_y)
+    
+    plt.draw()
+
+button_reset.on_clicked(resetAmplitude)
 
 # Zoom In and Out buttons
 ax_zoom_in = plt.axes([0.8, 0.01, 0.15, 0.05])
